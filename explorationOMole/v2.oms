@@ -26,7 +26,7 @@ val exploration =
 
 
 val gama = 
-  GamaTask("/home/reyman/Projets/escape/rouen-guillaume/modele/Guillaume_Evacuation/", "models/Modele_v2_evacuation.gaml", "openmole", 1 ) set (
+  GamaTask("/home/reyman/Projets/escape/rouen-guillaume/Guillaume_Evacuation/", "models/Modele_v2_evacuation.gaml", "openmole", 1 ) set (
     //gamaInputs += (use_traffic_lights, "use_traffic_lights"),
     //gamaInputs += (proba_fous, "proba_fous"),
     //gamaInputs += (type_simulation, "type_simulation"),
