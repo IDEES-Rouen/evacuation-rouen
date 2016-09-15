@@ -128,6 +128,9 @@ global {
              }
              list_temps_moy << temps_moy;
              list_nb_people << nb_personnes;
+             nb_personnes <- 0;
+             temps_tot <- 0;
+             
              
         }
         //save road type:"shp" to:chemin + "/shp_route/shape_usage_route_" + time + ".shp" crs: "EPSG:2154" with:[temps_moy::"Tps_Moy", nb_personnes::"people"] ;				
@@ -166,7 +169,7 @@ global {
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_per_road" to: "temps_per_road.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,people_per_road" to: "people_per_road.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,nb_people,mean_real_speed" to: "data.csv";
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: "evacuation_time.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: "evacuation_time.csv";
 		
 		//file folder <- new_folder(chemin) ; 
 		create evacuation_urgence from: shape_urgence {id <- int(self);}
