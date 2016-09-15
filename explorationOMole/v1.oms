@@ -1,0 +1,34 @@
+
+val use_traffic_lights = Val[Boolean]
+val proba_fous = Val[Double]
+val avoid_tj = Val[Double]
+val filecsv1 = Val[File]
+val filecsv2 = Val[File]
+val seed = Val[Long]
+
+val exploration =
+  ExplorationTask(
+    (avoid_tj in (0.0 to 1.0 by 0.25)) x
+    (seed in (UniformDistribution[Int]() take 30))
+  )
+
+val gama = 
+  GamaTask(workDirectory / "evacuation23082016", "models/Rouen Guillaume Fusion_v5.gaml", "openmole", 10801) set (
+    //gamaInputs += (Scenario, "scenario"),
+    gamaInputs += (use_traffic_lights, "use_traffic_lights"),
+    gamaInputs += (proba_fous, "proba_fous"),
+    gamaInputs += (avoid_tj, "avoid_tj"),
+    input += seed,
+    
+    use_traffic_lights := true,
+    proba_fous := 0.0,
+    
+    gamaSeed := seed
+  )
+  
+val copyCSV1 = CopyFileHook(file1, workDirectory / "outputs/${seed}_csv1.csv")
+val copyCSV2 = CopyFileHook(file2, workDirectory / "outputs/${seed}_csv2.csv")
+
+
+val evacuation = exploration >- gama hook Seq(copyCSV1,copyCSV2)
+ evacuation.start

@@ -1,3 +1,5 @@
 /target
 .DS_Store
 .metadata/
+.Rhistory
+.directory

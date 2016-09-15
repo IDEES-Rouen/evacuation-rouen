@@ -1,0 +1,55 @@
+
+val filecsv1 = Val[File]
+val filecsv2 = Val[File]
+val filecsv3 = Val[File]
+val filecsv4 = Val[File]
+
+val seed = Val[Long]
+
+// True False
+val use_traffic_lights = Val[Boolean]
+// 0.0, 0.1, 0.15, 0.5, 1.0
+val proba_fous = Val[Double]
+//True False
+val axes_majeurs = Val[Boolean]
+// classique, aleatoire_total, longueur, ponderation
+val type_simulation = Val[String]
+
+
+val exploration =
+  ExplorationTask(
+    (proba_fous in List(0.0, 0.1, 0.15, 0.5, 1.0) x
+    (axes_majeurs in List(true,false)) x 
+    (use_traffic_lights in List(true,false)) x
+    (seed in (UniformDistribution[Int]() take 30))
+  )
+
+
+val gama = 
+  GamaTask("/home/reyman/Projets/escape/rouen-guillaume/modele/Guillaume_Evacuation/", "models/Modele_v2_evacuation.gaml", "openmole", 1 ) set (
+    //gamaInputs += (use_traffic_lights, "use_traffic_lights"),
+    //gamaInputs += (proba_fous, "proba_fous"),
+    //gamaInputs += (type_simulation, "type_simulation"),
+    seed:=42,
+    
+    type_simulation := "alea_alea",
+    axes_majeurs := false,
+    use_traffic_lights := true,
+    proba_fous := 0.0,
+    
+    outputFiles += ("models/temps_per_road.csv", filecsv1),
+    outputFiles += ("models/people_per_road.csv", filecsv2),
+    outputFiles += ("models/data.csv", filecsv3),
+    outputFiles += ("models/evacuation_time.csv", filecsv4),
+
+    gamaSeed := seed,
+    outputs+=seed
+  )
+  
+val copyCSV1 = CopyFileHook(filecsv1, workDirectory / "outputs/${seed}_temps_per_road.csv")
+val copyCSV2 = CopyFileHook(filecsv2, workDirectory / "outputs/${seed}_people_per_road.csv")
+val copyCSV3 = CopyFileHook(filecsv3, workDirectory / "outputs/${seed}_data.csv")
+val copyCSV4 = CopyFileHook(filecsv4, workDirectory / "outputs/${seed}_evacuation_time.csv")
+
+
+(gama hook (copyCSV1,copyCSV2,copyCSV3,copyCSV4))
