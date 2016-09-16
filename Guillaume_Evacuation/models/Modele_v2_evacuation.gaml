@@ -20,7 +20,7 @@ global {
 	string aleatoire_total <- "alea_alea"; // pour test <- à salongueurns doute enlever ++ enlever dans string type_simulation ++ enlever dans match aleatoire_total
 	string longueur <- "alea longueur";
 	string ponderation <- "alea ponderation";
-	string type_simulation <- classique among:[classique, aleatoire_total, longueur, ponderation] ;
+	string type_simulation <- "sc classique" among:[classique, aleatoire_total, longueur, ponderation] ;
 	
 	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
@@ -119,7 +119,7 @@ global {
 
 	
 	
-	reflex save_usage_route_openmole when: is_openmole and (time = 2 or every(600)) {
+	reflex save_usage_route_openmole when: is_openmole and (time = 2 or every(300)) {
 		ask road {
 			if  (nb_personnes > 0) {
 				temps_moy <- temps_tot / nb_personnes ;
@@ -142,11 +142,12 @@ global {
 				}
 				save txt_pp to: "people_per_road.csv";
 				
-				string txt_tm <-""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway;
+				string txt_tm <-""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway + "," + temps_tot_global ;
 				loop tm over: list_temps_moy {
 					txt_tm <- txt_tm+ ","+ tm  ;
 				}
 				save txt_tm to: "temps_per_road.csv";
+				save temps_tot_global to: "temps_per_road.csv";
 			}
 		}
 	}
@@ -166,7 +167,7 @@ global {
 	//****************************************
 	string chemin <- "sorties/tf_" + use_traffic_lights + "_fou_" + proba_fous + "_" + "coefpeople_" + coeff_nb_people + "_" + #now ;
 	init { 
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_per_road" to: "temps_per_road.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_tot_global,temps_per_road" to: "temps_per_road.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,people_per_road" to: "people_per_road.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,nb_people,mean_real_speed" to: "data.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: "evacuation_time.csv";
@@ -637,7 +638,9 @@ species road skills: [skill_road] {
 	list<node_> neighbours;
 	
 	int temps_tot;
+	int temps_tot_global;
 	int nb_personnes;
+	int nb_personnes_tot;
 	int nb_personnes_time;
 	float temps_moy;
 	
@@ -1024,7 +1027,9 @@ species people skills: [advanced_driving] schedules: [] {
 		} else {
 			ask road(current_road) {
 				nb_personnes <- nb_personnes + 1 ;
+				nb_personnes_tot <- nb_personnes_tot + 1 ;
 				temps_tot <- temps_tot + myself.temps_passe ;
+				temps_tot_global <- temps_tot_global + myself.temps_passe;
 			}
 		}
 		temps_passe <- 0 ;	
