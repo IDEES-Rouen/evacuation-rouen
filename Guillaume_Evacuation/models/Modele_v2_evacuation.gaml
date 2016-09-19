@@ -147,7 +147,7 @@ global {
 					txt_tm <- txt_tm+ ","+ tm  ;
 				}
 				save txt_tm to: "temps_per_road.csv";
-				save temps_tot_global to: "temps_per_road.csv";
+				//save temps_tot_global to: "temps_per_road.csv";
 			}
 		}
 	}
