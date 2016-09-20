@@ -22,7 +22,7 @@ global {
 	string ponderation <- "alea ponderation";
 	string type_simulation <- "sc classique" among:[classique, aleatoire_total, longueur, ponderation] ;
 	
-	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige_id.shp") ;
+	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
 	file shape_urgence  <-  axes_majeurs ?file ("../includes/nodes_7200_pm_ok_v1_selec_sorties_Axes.shp") : file ("../includes/nodes_7200_pm_ok_v1_selec_sorties.shp") ;
 	
