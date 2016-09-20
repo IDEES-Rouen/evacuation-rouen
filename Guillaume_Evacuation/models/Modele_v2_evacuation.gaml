@@ -22,7 +22,7 @@ global {
 	string ponderation <- "alea ponderation";
 	string type_simulation <- "sc classique" among:[classique, aleatoire_total, longueur, ponderation] ;
 	
-	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
+	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige_id.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
 	file shape_urgence  <-  axes_majeurs ?file ("../includes/nodes_7200_pm_ok_v1_selec_sorties_Axes.shp") : file ("../includes/nodes_7200_pm_ok_v1_selec_sorties.shp") ;
 	
@@ -91,7 +91,7 @@ global {
 	
 	string simulation_id <- ""+axes_majeurs+"_"+type_simulation +"_"+ proba_fous + "_" + use_traffic_lights + "_"+  seed;
 	
-	list<int> evacuation_steps <- [10,20,30,40,50,60,70,80,90,99,100];
+	list<int> evacuation_steps <- [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99,100];
 	int evacuation_steps_index <- 0;
 	
 	int nb_people_init;
@@ -197,7 +197,7 @@ global {
 			min_traffic_jam_people_creation <- int( max([3,min([capacite_max/2.0, min_embouteillage_people_creation])]));
 			geom_display <- (shape + (2.5 * lanes));
 			max_embouteillage_vitesse <- maxspeed / speed_coeff_traffic_jam;
-			id <- int(self);
+			//id <- int(self);
 		}	
 		//create danger from: file("../includes/seveso_lubrizol_1500m.shp") ;
 		write "etape 2";
