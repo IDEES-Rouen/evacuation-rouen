@@ -192,7 +192,7 @@ global {
 		
 		//do test_ssp;
 		
-		save "id,name,highway,maxspeed,lanes,perimenter,nb_pass78,nb_pass89" to: ("routes_" +id_sim+".csv");
+		save "id,name,highway,maxspeed,lanes,perimenter,is_traffic_jam,nb_pass78,nb_pass89,temps_moyen" to: ("routes_" +id_sim+".csv");
 		save "id,name,comptage_78_S1,comptage_78_S2,comptage_89_S1,comptage_89_S2" to: ("boucles_" +id_sim+".csv"); 
 	}
 	
@@ -606,7 +606,7 @@ global {
 	
 		if (compute_global_error and (time = (time_end - 1))){
 			ask road {
-				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ nb_pass78 +","+ nb_pass89) to: ("routes_" +id_sim+".csv");
+				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ traffic_jam + "," + nb_pass78 +","+ nb_pass89 + "," + (temps_tot_global/nb_people_tot)) to: ("routes_" +id_sim+".csv");
 			}
 			ask boucle {
 				save (string(int(self))+","+ name +","+ comptage_78_S1 +","+ comptage_78_S2 + "," + comptage_89_S1 + ","+ comptage_89_S2) to: ("boucles_" +id_sim+".csv");
@@ -920,6 +920,7 @@ species road skills: [skill_road] frequency: 0 {
 	road next_linked_road;
 	string highway;
 	list<node_> neighbours;
+	float temps_tot_global;
 	
 	aspect geom {    
 		draw geom_display border:  rgb("gray")  color: rgb("gray") ;
@@ -1102,6 +1103,7 @@ species people skills: [advanced_driving] frequency: 0{
 	bool mode_avoid <- false;
 	int cpt_avoid <- 0;
 	float val_order;
+	int temps_passe <- 0 ;  //update: temps_passe +1;
 	
 	
 	action choose_target_node  {
@@ -1155,6 +1157,7 @@ species people skills: [advanced_driving] frequency: 0{
 	
 	//bool virgin <- true;
 	action driving {
+		temps_passe <- temps_passe + 1;
 		if (distance_to_goal = 0 and real_speed = 0) {
 			proba_respect_priorities <- proba_respect_priorities - 0.1;
 		} else {
@@ -1348,6 +1351,7 @@ species people skills: [advanced_driving] frequency: 0{
 				cpt_avoid <- 0;
 			}
 		}
+		temps_passe <- 0 ;	
 		if (proba_avoid_traffic_jam > 0 and flip(proba_avoid_traffic_jam)) {
 			current_node <- node_(new_road.source_node);
 			roads_traffic_jam <- remove_duplicates(roads_traffic_jam + (current_node.neighbours_tj));// where (each.embout_route != nil and each.embout_route.real));// and not (each in roads_traffic_jam)));
@@ -1374,7 +1378,10 @@ species people skills: [advanced_driving] frequency: 0{
 			}
 		}
 		if (current_path != nil) {
-			new_road.nb_people_tot <- new_road.nb_people_tot + 1;
+			if (time >= 1#h) {
+				new_road.nb_people_tot <- new_road.nb_people_tot + 1;
+				new_road.temps_tot_global <- new_road.temps_tot_global + temps_passe;
+			}
 			if (time >= 1#h and time < 2#h) {
 				new_road.nb_pass78 <- new_road.nb_pass78 + 1;
 			} else if (time >= 2#h) {
