@@ -90,6 +90,7 @@ global {
 	float tps_debut <-machine_time;
 	
 	string simulation_id <- ""+axes_majeurs+"_"+type_simulation +"_"+ proba_fous + "_" + use_traffic_lights + "_"+  seed;
+	string simulation_id_openmole <- "am-"+axes_majeurs+"_sc-"+type_simulation +"_fou-"+ proba_fous + "_tl-" + use_traffic_lights + "_";
 	
 	list<int> evacuation_steps <- [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99,100];
 	int evacuation_steps_index <- 0;
@@ -167,10 +168,10 @@ global {
 	//****************************************
 	string chemin <- "sorties/tf_" + use_traffic_lights + "_fou_" + proba_fous + "_" + "coefpeople_" + coeff_nb_people + "_" + #now ;
 	init { 
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_tot_global,temps_per_road" to: "temps_per_road.csv";
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,people_per_road" to: "people_per_road.csv";
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,nb_people,mean_real_speed" to: "data.csv";
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: "evacuation_time.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_tot_global,temps_per_road" to: simulation_id_openmole + "temps_per_road.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,people_per_road" to: simulation_id_openmole + "people_per_road.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,nb_people,mean_real_speed" to: simulation_id_openmole + "data.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: simulation_id_openmole + "evacuation_time.csv";
 		
 		//file folder <- new_folder(chemin) ; 
 		create evacuation_urgence from: shape_urgence {id <- int(self);}
