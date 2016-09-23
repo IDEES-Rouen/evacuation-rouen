@@ -190,7 +190,7 @@ global {
 		}
 
 		write "etape 1";
-		create road from: shape_file_roads with:[nb_agents::int(read("NB_CARS")), name::string(read("name")),highway::string(get("highway")),junction::string(read("junction")),lanes::int(read("lanes")), maxspeed::float(read("maxspeed")) #h/#km, oneway::string(read("oneway")), lanes_forward ::int (get( "lanesforwa")), lanes_backward :: int (get("lanesbackw")), priority::float((get("priority"))), target_evacuation ::int(get("evacuation"))] {
+		create road from: shape_file_roads with:[nb_agents::int(read("NB_CARS")), name::string(read("name")),highway::string(get("highway")),junction::string(read("junction")),lanes::int(read("lanes")), maxspeed::float(read("maxspeed")) #km/#h, oneway::string(read("oneway")), lanes_forward ::int (get( "lanesforwa")), lanes_backward :: int (get("lanesbackw")), priority::float((get("priority"))), target_evacuation ::int(get("evacuation"))] {
 			if maxspeed <= 0 {maxspeed <- 50 #km/#h;}
 			if lanes <= 0 {lanes <- 1;}
 			capacite_max <- 1+ int(lanes * shape.perimeter/(5.0));
