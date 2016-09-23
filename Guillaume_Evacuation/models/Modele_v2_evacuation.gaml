@@ -137,16 +137,16 @@ global {
         //save road type:"shp" to:chemin + "/shp_route/shape_usage_route_" + time + ".shp" crs: "EPSG:2154" with:[temps_moy::"Tps_Moy", nb_personnes::"people"] ;				
 		if (time = 3#h) {
 			ask road {
-				string txt_pp <- ""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway;
+				string txt_pp <- ""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway + "," + maxspeed + "," + lanes ;
 				loop v over: list_nb_people {
 					txt_pp <- txt_pp+ ","+ v  ;
 				}
 				save txt_pp to: simulation_id_openmole + "people_per_road.csv";
 				
-				string txt_tm <-""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway + "," + temps_tot_global ;
+				string txt_tm <-""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway + "," + maxspeed + "," + lanes + "," + temps_tot_global ;
 				loop tm over: list_temps_moy {
 					txt_tm <- txt_tm+ ","+ tm  ;
-				}
+				} 
 				save txt_tm to: simulation_id_openmole + "temps_per_road.csv";
 				//save temps_tot_global to: "temps_per_road.csv";
 			}
@@ -168,8 +168,8 @@ global {
 	//****************************************
 	string chemin <- "sorties/tf_" + use_traffic_lights + "_fou_" + proba_fous + "_" + "coefpeople_" + coeff_nb_people + "_" + #now ;
 	init { 
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,temps_tot_global,temps_per_road" to: simulation_id_openmole + "temps_per_road.csv";
-		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,people_per_road" to: simulation_id_openmole + "people_per_road.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,maxspeed,lanes,temps_tot_global,temps_per_road" to: simulation_id_openmole + "temps_per_road.csv";
+		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,id,highway,maxspeed,lanes,people_per_road" to: simulation_id_openmole + "people_per_road.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,nb_people,mean_real_speed" to: simulation_id_openmole + "data.csv";
 		save "axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac" to: simulation_id_openmole + "evacuation_time.csv";
 		
