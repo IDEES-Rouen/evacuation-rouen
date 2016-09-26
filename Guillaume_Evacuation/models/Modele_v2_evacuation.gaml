@@ -20,7 +20,7 @@ global {
 	string aleatoire_total <- "alea_alea"; // pour test <- à salongueurns doute enlever ++ enlever dans string type_simulation ++ enlever dans match aleatoire_total
 	string longueur <- "alea longueur";
 	string ponderation <- "alea ponderation";
-	string type_simulation <- "sc_classique" among:[classique, aleatoire_total, longueur, ponderation] ;
+	string type_simulation <- "sc_classique" ;//among:[classique, aleatoire_total, longueur, ponderation] ;
 	
 	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
