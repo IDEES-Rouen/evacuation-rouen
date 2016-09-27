@@ -20,7 +20,7 @@ global {
 	string aleatoire_total <- "alea_alea"; // pour test <- à salongueurns doute enlever ++ enlever dans string type_simulation ++ enlever dans match aleatoire_total
 	string longueur <- "alea longueur";
 	string ponderation <- "alea ponderation";
-	string type_simulation <- "sc_classique" ;//among:[classique, aleatoire_total, longueur, ponderation] ;
+	string type_simulation <- "alea_alea" ;//among:[classique, aleatoire_total, longueur, ponderation] ;
 	
 	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
@@ -32,7 +32,7 @@ global {
 	
 	map<road,float> general_speed_map_speed;
 	
-	float proba_fous <- 0.0;
+	float proba_fous <- 0.1;
 	
 	float proportion_speed_lane <- 1.0;
 	float proportion_speed <- 0.25;
@@ -185,6 +185,7 @@ global {
 				do die;
 			}
 		}
+		write length(node_);
 		ask evacuation_urgence {
 			noeud_evacuation <- node_ closest_to self;
 		}
@@ -193,7 +194,7 @@ global {
 		create road from: shape_file_roads with:[nb_agents::int(read("NB_CARS")), name::string(read("name")),highway::string(get("highway")),junction::string(read("junction")),lanes::int(read("lanes")), maxspeed::float(read("maxspeed")) #km/#h, oneway::string(read("oneway")), lanes_forward ::int (get( "lanesforwa")), lanes_backward :: int (get("lanesbackw")), priority::float((get("priority"))), target_evacuation ::int(get("evacuation"))] {
 			if maxspeed <= 0 {maxspeed <- 50 #km/#h;}
 			if lanes <= 0 {lanes <- 1;}
-			if (first(shape.points) = last(shape.points)) {do die;} 
+			if (first(shape.points) = last(shape.points)) or (target_evacuation >= length(evacuation_urgence)) {bug_road <- true;} 
 			capacite_max <- 1+ int(lanes * shape.perimeter/(5.0));
 			min_traffic_jam_people_destroy <- int(max([3,min([capacite_max / 2.0, min_embouteillage_people_destruction])]));
 			min_traffic_jam_people_creation <- int( max([3,min([capacite_max/2.0, min_embouteillage_people_creation])]));
@@ -249,21 +250,21 @@ global {
 				}	
 			}
 			match aleatoire_total {
-				list<float> poids <- road collect (each.shape.perimeter/ each.shape.perimeter);
+				list<float> poids <- road collect (each.bug_road ? 0 : (each.shape.perimeter/ each.shape.perimeter));
 				loop times: nb_people_alea {
 					road the_road <- road[rnd_choice(poids)];
 					ask world{do create_one_people_road(the_road, any_location_in(the_road), rnd(the_road.lanes)) ;}
 				}
 			}
 			match longueur {
-				list<float> poids <- road collect (each.shape.perimeter);
+				list<float> poids <- road collect (each.bug_road ? 0 : (each.shape.perimeter));
 				loop times: nb_people_alea {
 					road the_road <- road[rnd_choice(poids)];
 					ask world{do create_one_people_road(the_road, any_location_in(the_road), rnd(the_road.lanes)) ;}
 				}
 			}
 			match ponderation {
-				list<float> poids <- road collect (each.shape.perimeter * each.maxspeed*each.lanes);
+				list<float> poids <- road collect (each.bug_road ? 0 : (each.shape.perimeter * each.maxspeed*each.lanes));
 				loop times: nb_people_alea {
 					road the_road <- road[rnd_choice(poids)];
 					ask world{do create_one_people_road(the_road, any_location_in(the_road), rnd(the_road.lanes)) ;}
@@ -277,7 +278,6 @@ global {
 		}
 		write "etape 7";
 		nb_people_init <- length(people);
-		 
 		// PRIORITÉS
 		//save priority and target_evacuation of roads in the shapefile roads_7200_pm_ok_v3
 		//priorités
@@ -622,6 +622,7 @@ species road skills: [skill_road] {
 	int nb_people_tot <- 0;
 	int nb_agents ;
 	bool danger_area <- false;
+	bool bug_road <- false;
 	
 	int lanes_backward;
 	int lanes_forward;
@@ -800,6 +801,7 @@ species people skills: [advanced_driving] schedules: [] {
 	action choose_target_node  {
 		if cycle >= time_accident {
 			//target_node <- (evacuation_urgence with_min_of (each distance_to self)).noeud_evacuation;
+			if (current_road = nil) {do die;}
 			target_node <- evacuation_urgence[road(current_road).target_evacuation].noeud_evacuation;
 			if (target_node = nil) {
 				if (current_road != nil) {
