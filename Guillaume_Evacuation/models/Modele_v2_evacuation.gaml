@@ -193,11 +193,13 @@ global {
 		create road from: shape_file_roads with:[nb_agents::int(read("NB_CARS")), name::string(read("name")),highway::string(get("highway")),junction::string(read("junction")),lanes::int(read("lanes")), maxspeed::float(read("maxspeed")) #km/#h, oneway::string(read("oneway")), lanes_forward ::int (get( "lanesforwa")), lanes_backward :: int (get("lanesbackw")), priority::float((get("priority"))), target_evacuation ::int(get("evacuation"))] {
 			if maxspeed <= 0 {maxspeed <- 50 #km/#h;}
 			if lanes <= 0 {lanes <- 1;}
+			if (first(shape.points) = last(shape.points)) {do die;} 
 			capacite_max <- 1+ int(lanes * shape.perimeter/(5.0));
 			min_traffic_jam_people_destroy <- int(max([3,min([capacite_max / 2.0, min_embouteillage_people_destruction])]));
 			min_traffic_jam_people_creation <- int( max([3,min([capacite_max/2.0, min_embouteillage_people_creation])]));
 			geom_display <- (shape + (2.5 * lanes));
 			max_embouteillage_vitesse <- maxspeed / speed_coeff_traffic_jam;
+			
 			//id <- int(self);
 		}	
 		//create danger from: file("../includes/seveso_lubrizol_1500m.shp") ;
@@ -247,7 +249,7 @@ global {
 				}	
 			}
 			match aleatoire_total {
-				list<float> poids <- road collect (each.shape.perimeter / each.shape.perimeter);
+				list<float> poids <- road collect (each.shape.perimeter/ each.shape.perimeter);
 				loop times: nb_people_alea {
 					road the_road <- road[rnd_choice(poids)];
 					ask world{do create_one_people_road(the_road, any_location_in(the_road), rnd(the_road.lanes)) ;}
@@ -446,10 +448,10 @@ global {
 	
 	reflex general_dynamic {
 	//	float t <- machine_time;
-		
 		ask traffic_signals {
 			do dynamic_node;
 		}
+		
 		//t1 <- t1 + machine_time - t;
 		//t <- machine_time;
 		if (every(5)) {
@@ -457,12 +459,14 @@ global {
 				do dynamic_road;
 			}	
 		}
+		
 		//t2 <- t2 + machine_time - t;
 		//t <- machine_time;
 		
 		ask people where (each.target_node = nil ){
 			do choose_target_node;
 		}
+		
 	//	t3 <- t3 + machine_time - t;
 	//	t <- machine_time;
 		
@@ -477,7 +481,7 @@ global {
 				do die;
 			 }
 		}
-	//	t4 <- t4 + machine_time - t;
+			//	t4 <- t4 + machine_time - t;
 	//	t <- machine_time;
 		
 		people_moving <- (people where (each.current_path != nil and each.final_target != nil ));
@@ -486,6 +490,7 @@ global {
 			val_order <- (road(current_road).priority * 1000000 - 10000 * segment_index_on_road + distance_to_goal);
 		}
 		people_moving <- people_moving sort_by each.val_order;
+		
 	//	t5 <- t5 + machine_time - t;
 	//	t <- machine_time;
 		int cpt <- 0;
@@ -494,7 +499,6 @@ global {
 			do driving;
 			cpt <- cpt + 1;
 		}
-		
 		//t6 <- t6 + machine_time - t;
 	//	t <- machine_time;
 		//ask people where (each.target_node != nil and (each.location distance_to each.target_node.location < 10)){
@@ -508,7 +512,7 @@ global {
 				do die;	
 			}
 		}
-	//	t7 <- t7 + machine_time - t;
+		//	t7 <- t7 + machine_time - t;
 	}
 	
 	//****** UTILISER POUR L'OPTIMISATION DU MODELE *****
