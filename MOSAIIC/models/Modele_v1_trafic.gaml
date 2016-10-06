@@ -105,7 +105,6 @@ global {
 	
 	string id_sim <- "" +proba_avoid_traffic_jam_global +"-"+ seed ;
 	
-	bool batch_mode <- true; // pour openMole -> true
 	float global_error;
 	float global_error_sum;
 	float global_error_tot;
@@ -136,7 +135,6 @@ global {
 		//save road to: "routes_trafic_V1.shp"  type: "shp" with:[id::"id",name::(("name")),highway::(("highway")),junction::(("junction")),lanes::(("lanes")), maxspeed::(("maxspeed")), oneway::(("oneway")), lanes_forward :: (( "lanesforwa")), lanes_backward ::  (("lanesbackw"))] ;
 		
 		real_roads <- road where (each.shape.perimeter > min_length);
-		if (not batch_mode) {write "build road";}
 		general_speed_map_speed_lane <- road as_map (each::(each.shape.perimeter / each.maxspeed/ each.lanes)); 
 		general_speed_map_speed <- road as_map (each::(each.shape.perimeter / each.maxspeed)); 
 		general_speed_map_distance <- road as_map (each::each.shape.perimeter); 
@@ -172,17 +170,12 @@ global {
 			}
 			
 		}
-		if (not batch_mode) {write "build graphs";}
 		connected_nodes <- node_ where (not empty(each.roads_in) and not empty(each.roads_out));
 		do init_traffic_signal;
-		if (not batch_mode) {write "init traffic signal";}
 		do init_area;
-		if (not batch_mode) {write "init areas";}
 		do init_od od_internal: OD_interne_init od_transit: OD_transit_init od_echange:OD_echange_init;
-		if (not batch_mode) {write "init OD";}
 		do init_boucle;
 		//create boucle from: shape_file_boucle with: [name::string(get("nom_boucle")), comptage::string(get("comptage"))];
-		if (not batch_mode) {write "init boucle";}
 		do init_proportion (matrix(init_time_amorcage));
 		current_factor_start <- first(proportion);
 		remove current_factor_start from: proportion;
@@ -222,7 +215,6 @@ global {
 		int nb <- length(vertices);
 		if (proportion_speed_lane) > 0 {
 			file_ssp_speed_lane<- csv_file("shortest_paths_speed_lanes.csv",";");
-			if (not batch_mode) { write "file_ssp_speed_lane: " + length(file_ssp_speed_lane);}
 		}
 		/*if (proportion_speed_lane < 1.0 and proportion_speed > 0.0) {
 			file_ssp_speed <- csv_file("../includes/data_validation/shortest_paths_speed_2.csv",";");
@@ -285,7 +277,6 @@ global {
 		do fill_OD(od_internal);
 		do fill_OD(od_transit);
 		do fill_OD(od_echange);
-		if (not batch_mode) {write "matrix loaded";}
 		float source_sum <- sum (ars collect each.val_source);
 		float cs <- 0.0;
 		ask ars{
@@ -305,7 +296,6 @@ global {
 		}
 		nb_hours <- time = 0 ? time_end_init / 1#h : (time_end - time_end_init) / 1 #h;
 		nb_people <- int(nb_hours * int(source_sum / nb_people_factor));
-	 	if (not batch_mode) {write "Nb total of people for the " + nb_hours +" hours : " + int(nb_people);}
 		
 	}
 	 
@@ -521,52 +511,36 @@ global {
 	
 	
 	reflex general_dynamic {
-		float t <- machine_time;
 		ask traffic_signals {
 			do dynamic_node;
 		}
 		
-		t_1 <- t_1 + machine_time - t;
-		t <- machine_time;
 		if (every(5)) {
 			ask real_roads {
 				do dynamic_road;
 			}	
 		}
 		
-		t_2 <- t_2 + machine_time - t;
-		t <- machine_time;
 		
 		ask people where (each.target_node = nil ){
 			do choose_target_node;
 		}
-		t_3 <- t_3 + machine_time - t;
-		t <- machine_time;
 	
 		ask people where ((each.current_path = nil or each.recompute_path or each.final_target = nil)and each.target_node != nil) {
 			 do choose_a_path; 
 		}
-		t_4 <- t_4 + machine_time - t;
-		t <- machine_time;
 	
 		people_moving <- (people where (each.current_path != nil and each.final_target != nil ));
 		
-		t5_4 <- t5_4 + machine_time - t;
-		float t2 <- machine_time;
 		ask people_moving {
 			val_order <- - 1000000 * segment_index_on_road + distance_to_goal;
 		}
 		people_moving <- people_moving sort_by each.val_order;
-		t5_3 <- t5_3 + machine_time - t2;
-		t2 <- machine_time;
 		ask people_moving{
 			 do driving;
 			 time_to_arrive <- time_to_arrive + step;
 			 mean_real_speed <- mean_real_speed + real_speed;
 		}
-		t5_6 <- t5_6 + machine_time - t2;
-		t_5 <- t_5 + machine_time - t;
-		t <- machine_time;
 		ask people where (each.target_node != nil and (each.location distance_to each.target_node.location < 5)){
 			if (current_road != nil) {
 				ask road(current_road) {
@@ -581,8 +555,6 @@ global {
 			//write name + " is arrived";
 			do die;
 		}
-		t_6 <- t_6 + machine_time - t;
-		t <- machine_time;
 	
 		if (time <=time_end ) {
 			ask boucle {
@@ -590,8 +562,6 @@ global {
 			}
 		}
 		
-		t_7 <- t_7 + machine_time - t;
-		t <- machine_time;
 		
 		if (compute_global_error) {
 			ask boucle {
@@ -634,49 +604,7 @@ global {
 		
 	}
 	
-	float t_1;
-	float t_2;
-	float t_3;
-	float t_4;
-	float t_4_1;
-	float t_4_2;
-	float t_4_3;
-	float t_4_4;
-	float t_5;
-	float t5_1;
-	float t5_2;
-	float t5_3;
-	float t5_4;
-	float t5_6;
-	
-	float t_6;
-	float t_7;
-	reflex write_time_info when: false and every(30 #mn){
-		write "******* " + cycle + " ********";
-		write "time for traffic_signals dynamic: " + t_1;
-		write "time for road dynamic: "  + t_2;
-		write "time for choose_target_node dynamic: " + t_3;
-		write "time for choose_a_path dynamic: "  + t_4;
-		write "time for computing a shortest path: "  + t_4_1;
-		write "time for loading a shortest path: "  + t_4_2;
-		write "time for testing path: "  + t_4_3;
-		write "time for testing path 2 + computing: "  + t_4_4;
-		write "time for drive dynamic: "  + t_5;
-		write "time for external factor 1: "  + t5_1;
-		write "time for driving: "  + t5_2;
-		write "sort people moving: "  + t5_3;
-		write "filter people moving: "  + t5_4;
-		write "driving action: "  + t5_6;
-	
-		write "time for unregister dynamic: " + t_6;
-		write "time for boucle dynamic: "  + t_7;
 		
-		ask road {
-			nb_cars <- length(all_agents);
-		}
-		save road type: "shp" to: "roads_" + cycle + ".shp" with:[nb_cars::"NB_CARS", name::"name",highway::"highway",junction::"junction",lanes::"lanes", maxspeed::"maxspeed", oneway::"oneway", lanes_forward ::"lanesforwa", lanes_backward ::"lanesbackw"];
-	}
-	
 	reflex end_init when: time = time_end_init {
 		do init_od od_internal: OD_interne od_transit: OD_transit od_echange:OD_echange;
 		
@@ -686,12 +614,6 @@ global {
 		
 	}
 	
-	
-
-	reflex end when: (time = max([time_end_final,time_end])) and not batch_mode{
-		save road type:"shp" to: "results_" + id_sim+ "/passages.shp"  with: [nb_vehicles::"NB",name::"name",highway::"highway",junction::"junction",lanes::"lanes", maxspeed::"maxspeed", oneway::"oneway", lanes_forward ::"lanesforwa", lanes_backward ::"lanesbackw"];
-		do pause;
-	}
 } 
 
 species boucle {
@@ -1410,12 +1332,9 @@ species people skills: [advanced_driving] frequency: 0{
 } 
 
 experiment traffic_simulation type: gui {
-	output {
-		monitor "nb people" value: length(people);
-		monitor "nb traffic jams" value: embouteillage count each.real;
-		monitor "nb_possible_recomputes" value: nb_possible_recomputes;
-		monitor "nb_recomputes" value: nb_recomputes;
-		monitor "nb_people_supp" value: nb_people_supp;
+	parameter proba_avoid_traffic_jam_global var: proba_avoid_traffic_jam_global;
+	
+	output { 
 		display carte_embouteillage type: opengl {
 			species road aspect: base_gray refresh: false;
 			species embouteillage aspect: base ;
@@ -1476,15 +1395,4 @@ experiment traffic_simulation type: gui {
 		
 	}
 	
-}
-
-// This experiment explores two parameters with an exhaustive strategy,
-// repeating each simulation three times (the aggregated fitness correspond to the mean fitness), 
-// in order to find the best combination of parameters to minimize the number of infected people
-experiment 'Exhaustive exploration' type: batch repeat: 1 keep_seed: true until: (time = max([time_end_final,time_end])){
-	parameter 'proba know map' var: proba_know_map among: [  0.0, 0.25, 0.5, 1.0  ];
-	parameter 'proportion_speed_lane:' var: proportion_speed_lane among: [ 1.0 ];
-	parameter "proba_avoid_traffic_jam_global:" var: proba_avoid_traffic_jam_global among: [0,0.25,0.5,1.0];
-	parameter "batch_mode" var: batch_mode among: [true];
-	method exhaustive ;
 }
