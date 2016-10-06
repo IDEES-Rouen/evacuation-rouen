@@ -132,8 +132,6 @@ global {
 			max_embouteillage_vitesse <- maxspeed / speed_coeff_traffic_jam;
 			neighbours <- node_ at_distance distance_see_traffic_jams;
 		}
-		//save road to: "routes_trafic_V1.shp"  type: "shp" with:[id::"id",name::(("name")),highway::(("highway")),junction::(("junction")),lanes::(("lanes")), maxspeed::(("maxspeed")), oneway::(("oneway")), lanes_forward :: (( "lanesforwa")), lanes_backward ::  (("lanesbackw"))] ;
-		
 		real_roads <- road where (each.shape.perimeter > min_length);
 		general_speed_map_speed_lane <- road as_map (each::(each.shape.perimeter / each.maxspeed/ each.lanes)); 
 		general_speed_map_speed <- road as_map (each::(each.shape.perimeter / each.maxspeed)); 
@@ -180,36 +178,11 @@ global {
 		current_factor_start <- first(proportion);
 		remove current_factor_start from: proportion;
 		
-		//save boucle type:"shp" to: "results_" + id_sim+ "/boucles.shp"  with:[name::"nom_boucle", comptage::"comptage"];
-		//save OD_area type:"shp" to: "results_" + id_sim+ "/area.shp"  with: [name::"ID"];
 		
-		//do test_ssp;
-		
-		save "id,name,highway,maxspeed,lanes,perimenter,is_traffic_jam,nb_pass78,nb_pass89,temps_moyen" to: ("routes_" +id_sim+".csv");
-		save "id,name,comptage_78_S1,comptage_78_S2,comptage_89_S1,comptage_89_S2" to: ("boucles_" +id_sim+".csv"); 
+		save "id,name,highway,maxspeed,lanes,perimenter,is_traffic_jam,nb_pass78,nb_pass89,temps_moyen" to: ("routes.csv");
+		save "id,name,comptage_78_S1,comptage_78_S2,comptage_89_S1,comptage_89_S2" to: ("boucles.csv"); 
 	}
 	
-	action test_ssp {
-		float t1 <- 0.0;
-		float t2 <- 0.0;
-		string strategy <- "speed lane" ;
-			map<road,float> map_weights <- map<road, float>(strategy="speed lane" ? general_speed_map_speed_lane : (strategy="speed" ? general_speed_map_speed : (strategy="distance" ? general_speed_map_distance : general_speed_map_traffic_light)));
-			road_network_custom <- road_network_custom with_weights map_weights;
-	
-		loop times: 5000 {
-			node_ ns <- one_of(node_);
-			node_ nt <- one_of(node_);
-			road_network_custom <- (road_network_custom with_optimizer_type "Dijkstra") use_cache false;
-			float t <- machine_time;
-			path current_path <- road_network_custom path_between (ns,nt);
-			t1 <- t1 + machine_time - t;
-			road_network_custom <- (road_network_custom with_optimizer_type "AStar") use_cache false;
-			t <- machine_time;
-			current_path <- road_network_custom path_between (ns,nt);
-			t2 <- t2 + machine_time - t;
-		}
-		write "temps Dijkstra : " + t1 + " temps Astar : " + t2;
-	}
 	
 	action fill_matrix {
 		int nb <- length(vertices);
@@ -576,31 +549,13 @@ global {
 	
 		if (compute_global_error and (time = (time_end - 1))){
 			ask road {
-				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ traffic_jam + "," + nb_pass78 +","+ nb_pass89 + "," + (temps_tot_global/nb_people_tot)) to: ("routes_" +id_sim+".csv");
+				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ traffic_jam + "," + nb_pass78 +","+ nb_pass89 + "," + (temps_tot_global/nb_people_tot)) to: ("routes.csv");
 			}
 			ask boucle {
-				save (string(int(self))+","+ name +","+ comptage_78_S1 +","+ comptage_78_S2 + "," + comptage_89_S1 + ","+ comptage_89_S2) to: ("boucles_" +id_sim+".csv");
+				save (string(int(self))+","+ name +","+ comptage_78_S1 +","+ comptage_78_S2 + "," + comptage_89_S1 + ","+ comptage_89_S2) to: ("boucles.csv");
 			}
 		}
 		
-		/*if (save_results and ((int(time) mod int(save_result_frequency)) = 0)) {
-			save road type:"shp" to:(shape_results + "_" + time + ".shp") with: [nb_people::"nb_people", nb_people_tot::"nb_people_tot", oneway::"oneway", lanes::"lanes", is_blocked::"is_blocked", traffic_jam::"traffic_jam"];
-		}
-		if (every (6 #mn) and time <= time_end ) {
-		//	write (string(cycle) + " : nb_people_computed -> " + nb_people_computed);
-		//	write (string(cycle) + " : nb_people_calcul_ppc -> " + nb_people_calcul_ppc);
-		//	write (string(cycle) + " :  nb_deplace -> " + nb_deplace);
-		//	write (string(cycle) + " : nb_people -> " + nb_people);
-		//	write (string(cycle) + " : nb_people_arrived -> " + nb_people_arrived);
-		//	write (string(cycle) + " : nb_people_parti -> " + nb_people_parti);
-			
-			save road  type:"shp" to: "results_" + id_sim+ "/roads_" + cycle + ".shp" with: [nb_people::"NB"];
-			if (not empty(embouteillage) ) {
-				save embouteillage type:"shp" to: "results_" + id_sim+ "/embouteillages_" + cycle + ".shp" ;
-			}
-			save string(cycle) + "," + string(nb_people) + "," + nb_people_arrived + "," + global_error to:  "results_" + id_sim+"/nb_people.csv" ;
-			
-		}*/
 		
 	}
 	
@@ -701,8 +656,6 @@ species boucle {
 				comptage_89_S2 <- comptage_89_S2 + simulated_value_S2;
 			}
 			remove observed_value from: observed_data;	
-			
-			//save [current_hour,current_min,observed_value,simulated_value_S1,simulated_value_S2, error] type: "csv" to: ("results_" + id_sim + "/"+(name + "_result.csv"));
 		}
 	}
 }
