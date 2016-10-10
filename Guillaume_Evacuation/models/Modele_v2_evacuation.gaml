@@ -13,7 +13,7 @@
 model RoadTrafficComplex
 
 global {   
-	bool axes_majeurs <- false ;
+	bool axes_majeurs <- true ;
 	bool is_openmole <- true;
 	int nb_people_alea <- 18147 ;
 	string classique <- "sc_classique";
@@ -32,7 +32,7 @@ global {
 	
 	map<road,float> general_speed_map_speed;
 	
-	float proba_fous <- 0.1;
+	float proba_fous <- 0.5;
 	
 	float proportion_speed_lane <- 1.0;
 	float proportion_speed <- 0.25;
@@ -72,7 +72,7 @@ global {
  	list<node_> vertices;
 	
 	float proba_avoid_traffic_jam_global <- 0.8;
-	float proba_know_map <- 0.5; // initialement à 0.5
+	float proba_know_map <- 1.0; // initialement à 0.5
 	int nb_avoid_max <- 3;
 	
 	file file_ssp_speed;
@@ -85,7 +85,7 @@ global {
 	
 	float max_priority;
 	
-	bool use_traffic_lights <- true;
+	bool use_traffic_lights <- false;
 	
 	float tps_debut <-machine_time;
 	
@@ -101,6 +101,32 @@ global {
 	// ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII SAVE 
 	
 	
+	reflex test_sim when: every(60) {
+		
+		if (length(RoadTrafficComplex_model) >= 2) {
+			list<list<int>> vals;
+			
+			loop i from: 0 to: length(RoadTrafficComplex_model) - 1 {
+				ask RoadTrafficComplex_model[i] {
+					vals<< road collect each.nb_personnes;
+				}
+				
+			}
+			
+			map<pair<int, int>,int> nb_diff <- [];
+			loop i from: 0 to: length(RoadTrafficComplex_model) - 1 {
+				loop j from: i to: length(RoadTrafficComplex_model) - 1 {
+					loop k from: 0 to: length(vals[0]) - 1 {
+						if (vals[i][k] != vals[j][k]) {
+							nb_diff[i::j] <- nb_diff[i::j] + 1;
+						} 
+					}
+				}
+			}
+			
+			write "" + cycle + " nb diff: " + nb_diff ;
+		}
+	}
 	
 	reflex add_evacuation_time when: is_openmole  {
 		loop while:(evacuation_steps_index < length(evacuation_steps)) and (percentage_evac > evacuation_steps[evacuation_steps_index]) {
@@ -802,7 +828,7 @@ species people skills: [advanced_driving] schedules: [] {
 		if cycle >= time_accident {
 			//target_node <- (evacuation_urgence with_min_of (each distance_to self)).noeud_evacuation;
 			if (current_road = nil) {do die;}
-			target_node <- evacuation_urgence[road(current_road).target_evacuation].noeud_evacuation;
+			target_node <- road(current_road).target_evacuation >= length(evacuation_urgence) ? nil: evacuation_urgence[road(current_road).target_evacuation].noeud_evacuation;
 			if (target_node = nil) {
 				if (current_road != nil) {
 					ask road(current_road) {
@@ -1137,8 +1163,9 @@ experiment openmole type: gui  { // repeat: 3
 	parameter "proba_fous" var: proba_fous;
 	parameter "axes_majeurs" var: axes_majeurs;
     parameter "type_simulation" var: type_simulation;
-
-	output {
+  	output {
+		monitor "nb people" value: length(people);
+		monitor "nb path computation: " value: nb_path_recompute;
 		 display city_display refresh: every(2){ // retirer opengl
 				species road aspect: pp refresh: false;
 			 	species evacuation_urgence;
@@ -1152,6 +1179,8 @@ experiment openmole type: gui  { // repeat: 3
 experiment traffic_simulation_sc_exceptionnel type: gui {
 	parameter axes_majeurs var: axes_majeurs;
 	parameter nb_people_alea var: nb_people_alea;
+	
+	
 	
 	output {
 		monitor "nb people" value: length(people);
