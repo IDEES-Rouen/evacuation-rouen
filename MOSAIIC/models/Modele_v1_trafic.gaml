@@ -549,10 +549,10 @@ global {
 	
 		if (compute_global_error and (time = (time_end - 1))){
 			ask road {
-				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ traffic_jam + "," + nb_pass78 +","+ nb_pass89 + "," + (temps_tot_global/nb_people_tot)) to: ("routes.csv");
+				save (string(int(self))+","+ name +","+highway+ ","+maxspeed +","+lanes+","+ shape.perimeter+","+ traffic_jam + "," + nb_pass78 +","+ nb_pass89 + "," + (temps_tot_global/nb_people_tot)) to: ("routes.csv")  rewrite: false;
 			}
 			ask boucle {
-				save (string(int(self))+","+ name +","+ comptage_78_S1 +","+ comptage_78_S2 + "," + comptage_89_S1 + ","+ comptage_89_S2) to: ("boucles.csv");
+				save (string(int(self))+","+ name +","+ comptage_78_S1 +","+ comptage_78_S2 + "," + comptage_89_S1 + ","+ comptage_89_S2) to: ("boucles.csv")  rewrite: false;
 			}
 		}
 		

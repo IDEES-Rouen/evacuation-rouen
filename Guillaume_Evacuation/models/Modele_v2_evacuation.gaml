@@ -38,7 +38,7 @@ global {
 	float proportion_speed <- 0.25;
 	float proportion_distance <- 0.25;
 	
-	float min_embouteillage_people_creation <- 30.0;
+	float min_embouteillage_people_creation <- 30.0; 
 	float min_embouteillage_people_destruction <- 20.0;
 	float speed_coeff_traffic_jam <- 3.0;
 	float time_to_consider_traffic_jam <- 2#mn;
@@ -130,7 +130,7 @@ global {
 	
 	reflex add_evacuation_time when: is_openmole  {
 		loop while:(evacuation_steps_index < length(evacuation_steps)) and (percentage_evac > evacuation_steps[evacuation_steps_index]) {
-			save [axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac] type: "csv" to: /*simulation_id_openmole +*/  "evacuation_time.csv";
+			save [axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,percentage_evac] type: "csv" to: /*simulation_id_openmole +*/  "evacuation_time.csv" rewrite: false;
 		
 			evacuation_steps_index <- evacuation_steps_index + 1;
 		}
@@ -139,7 +139,7 @@ global {
 		
 	}
 	reflex save_classic_openmole when: is_openmole and every(10) {
-		save [axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,length(people),mean_real_speed] type: "csv" to: /*simulation_id_openmole +*/  "data.csv";
+		save [axes_majeurs, type_simulation, use_traffic_lights,proba_fous,seed,cycle,length(people),mean_real_speed] type: "csv" to: /*simulation_id_openmole +*/  "data.csv" rewrite: false;
 		
 		
 	}
@@ -167,13 +167,13 @@ global {
 				loop v over: list_nb_people {
 					txt_pp <- txt_pp+ ","+ v  ;
 				}
-				save txt_pp to: /*simulation_id_openmole +*/ "people_per_road.csv";
+				save txt_pp to: /*simulation_id_openmole +*/ "people_per_road.csv" rewrite: false;
 				
 				string txt_tm <-""+axes_majeurs+","+ type_simulation + ","+use_traffic_lights+","+ proba_fous + ","+string(seed)+","+id + "," + highway + "," + maxspeed + "," + lanes + "," + temps_tot_global ;
 				loop tm over: list_temps_moy {
 					txt_tm <- txt_tm+ ","+ tm  ;
 				} 
-				save txt_tm to: /*simulation_id_openmole +*/  "temps_per_road.csv";
+				save txt_tm to: /*simulation_id_openmole +*/  "temps_per_road.csv" rewrite: false;
 				//save temps_tot_global to: "temps_per_road.csv";
 			}
 		}
@@ -1153,7 +1153,7 @@ experiment batch type: batch until: empty(people) or time > 5#h { // repeat: 3
 	parameter "proba_fous:" var: proba_fous among: [0.0, 0.1, 0.5, 1.0];
 	reflex fin_simu {
 		write "use_traffic_lights:" + use_traffic_lights + "proba_fous:" + proba_fous +" time: " + time;
-		save [use_traffic_lights, proba_fous, cycle] type:"csv" to: "use_traffic_lights_proba_fous_time.csv";
+		save [use_traffic_lights, proba_fous, cycle] type:"csv" to: "use_traffic_lights_proba_fous_time.csv"  rewrite: false;
 	}
 	
 }
