@@ -20,7 +20,7 @@ global {
 	string aleatoire_total <- "alea_alea"; // pour test <- à salongueurns doute enlever ++ enlever dans string type_simulation ++ enlever dans match aleatoire_total
 	string longueur <- "alea longueur";
 	string ponderation <- "alea ponderation";
-	string type_simulation <- "alea_alea" ;//among:[classique, aleatoire_total, longueur, ponderation] ;
+	string type_simulation <- "sc_classique" ;//among:[classique, aleatoire_total, longueur, ponderation] ;
 	
 	file shape_file_roads  <- axes_majeurs ? file("../includes/roads_7200_pm_ok_v4_corrige_Axes.shp")  : file("../includes/roads_7200_pm_ok_v4_corrige.shp") ;
 	file shape_file_nodes  <-  axes_majeurs ?file("../includes/nodes_7200_pm_ok_v1.shp"): file("../includes/nodes_7200_pm_ok_v1.shp");
@@ -344,7 +344,7 @@ global {
 			security_distance_coeff <- est_fou ? 0.5 : 2 * (1.5 - rnd(1.0)); //  
 			proba_respect_priorities <- est_fou ? 0.5 : 1.0;
 			proba_respect_stops <- est_fou ? [0.5] : [1.0]; // POURQUOI CROCHETS ? 
-			proba_block_node <- est_fou ? 0.01 : 0.0;
+			proba_block_node <- est_fou ? 1.0 : 0.0;
 			proba_use_linked_road <- 0.0;
 			max_speed <- est_fou ? 150 : 150 #km/#h;
 			max_acceleration <- 1000.0;//(12 + rnd(500) / 100) #km/#h;
