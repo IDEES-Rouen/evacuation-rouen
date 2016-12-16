@@ -344,7 +344,7 @@ global {
 			security_distance_coeff <- est_fou ? 0.5 : 2 * (1.5 - rnd(1.0)); //  
 			proba_respect_priorities <- est_fou ? 0.5 : 1.0;
 			proba_respect_stops <- est_fou ? [0.5] : [1.0]; // POURQUOI CROCHETS ? 
-			proba_block_node <- est_fou ? 1.0 : 0.0;
+			proba_block_node <- est_fou ? rnd(1.0) : 0.0;
 			proba_use_linked_road <- 0.0;
 			max_speed <- est_fou ? 150 : 150 #km/#h;
 			max_acceleration <- 1000.0;//(12 + rnd(500) / 100) #km/#h;
